@@ -1,5 +1,8 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:mboathoscope/buttons/SaveButton.dart';
+import 'package:flutter_sound/flutter_sound.dart';
 
 class headerHalf extends StatelessWidget {
   const headerHalf({Key? key}) : super(key: key);
@@ -104,11 +107,24 @@ class headerHalf extends StatelessWidget {
               ),
               Expanded(
                 flex: 6,
-                child: Image.asset(
-                  'assets/images/img_record.png',
-                  height: 150,
-                  width: 150,
+                child: GestureDetector(
+                  onLongPress: () {
+                    log ("start record");
+
+                  },
+                  onLongPressEnd: (_) {
+                  log ("stop recordiing");
+                    // stop recording
+                  },
+                  child:  Image.asset(
+                    'assets/images/img_record.png',
+                    height: 150,
+                    width: 150,
+                  ),
+
+
                 ),
+
               ),
               Expanded(
                 flex: 3,
@@ -161,4 +177,28 @@ class headerHalf extends StatelessWidget {
       ],
     );
   }
+
+
+}
+const pathToSave = 'audio_example.aac';
+class SoundRecorder{
+  FlutterSoundRecorder? _audioRecorder;
+
+  Future _startRecord() async{
+    await _audioRecorder!.startRecorder(toFile: pathToSave);
+  }
+
+  Future _stopRecord() async{
+    await _audioRecorder!.stopRecorder();
+  }
+
+  Future _toggleRecord() async{
+    if (_audioRecorder!.isStopped){
+      await _startRecord();
+    }
+    else {
+      await _stopRecord();
+    }
+  }
+
 }

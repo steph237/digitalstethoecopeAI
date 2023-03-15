@@ -1,6 +1,7 @@
 
 import 'package:audio_waveforms/audio_waveforms.dart';
 import 'package:flutter/material.dart';
+import 'package:mboathoscope/buttons/headerHalf.dart';
 
 
 class WaveformButton extends StatefulWidget {
@@ -12,6 +13,8 @@ class WaveformButton extends StatefulWidget {
 
 
 class _WaveformButtonState extends State<WaveformButton> {
+
+  final recorder =SoundRecorder();
   late final RecorderController recorderController;
 
   void _initialiseController() {
