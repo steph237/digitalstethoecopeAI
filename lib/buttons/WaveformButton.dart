@@ -30,12 +30,6 @@ class _WaveformButtonState extends State<WaveformButton> {
     super.initState();
     _initialiseController();
 
-    recorder.init();
-  }
-
-  @override
-  void dispose(){
-    recorder.dispose();
   }
 
   @override

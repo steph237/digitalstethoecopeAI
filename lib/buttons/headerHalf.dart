@@ -1,5 +1,5 @@
 import 'dart:developer';
-import 'dart:html';
+
 
 import 'package:flutter/material.dart';
 import 'package:mboathoscope/buttons/SaveButton.dart';
@@ -135,10 +135,16 @@ class _headerHalfState extends State<headerHalf> {
                 child: GestureDetector(
                   onLongPress: () async {
                     final isRecording = await recorder._toggleRecord();
+                    setState(() {
 
-                    log("start record");
+                      backgroundColor: Color(0xffc70018);
+                      // foregroundColor: Colors.white,
+                    });
+
+
                   },
-                  onLongPressEnd: (_) {
+                  onLongPressEnd: (_) async {
+                    final isRecording = await recorder._toggleRecord();
                     log("stop recordiing");
                     // stop recording
                   },
@@ -246,5 +252,6 @@ class SoundRecorder {
     } else {
       await _stop();
     }
+    log("start record");
   }
 }
