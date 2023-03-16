@@ -1,18 +1,43 @@
 import 'dart:developer';
+import 'dart:html';
 
 import 'package:flutter/material.dart';
 import 'package:mboathoscope/buttons/SaveButton.dart';
 import 'package:flutter_sound/flutter_sound.dart';
+import 'WaveformButton.dart';
+import 'package:permission_handler/permission_handler.dart';
 
-class headerHalf extends StatelessWidget {
+class headerHalf extends StatefulWidget {
   const headerHalf({Key? key}) : super(key: key);
 
   @override
+  State<headerHalf> createState() => _headerHalfState();
+}
+
+class _headerHalfState extends State<headerHalf> {
+  final recorder = SoundRecorder();
+
+  @override
+  void initState(){
+    super.initState();
+
+    recorder.init();
+  }
+
+  @override
+  void dispose(){
+    super.dispose();
+
+    recorder.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final isRecording = recorder.isRecording;
     return Column(
       children: [
         Padding(
-          padding: const EdgeInsets.only(top: 34.0,left: 20, right: 20),
+          padding: const EdgeInsets.only(top: 34.0, left: 20, right: 20),
           child: Row(
             children: <Widget>[
               Expanded(
@@ -31,25 +56,25 @@ class headerHalf extends StatelessWidget {
                 child: Padding(
                   padding: const EdgeInsets.only(top: 28.0),
                   child: Stack(
-                      children: <Widget>[
-                        Positioned(
-                          child: Image.asset(
-                            'assets/images/img_notiblack.png',
-                            height: 30,
-                            width: 32,
-                            color: const Color(0xff3D79FD),
-                          ),
+                    children: <Widget>[
+                      Positioned(
+                        child: Image.asset(
+                          'assets/images/img_notiblack.png',
+                          height: 30,
+                          width: 32,
+                          color: const Color(0xff3D79FD),
                         ),
-                        const Positioned(
-                          bottom: 0.02,
-                          right: 3,
-                          child: CircleAvatar(
-                            radius: 5,
-                            backgroundColor: Color(0xff3D79FD),
-                            foregroundColor: Colors.white,
-                          ), //CircularAvatar
-                        ),
-                      ],
+                      ),
+                      const Positioned(
+                        bottom: 0.02,
+                        right: 3,
+                        child: CircleAvatar(
+                          radius: 5,
+                          backgroundColor: Color(0xff3D79FD),
+                          foregroundColor: Colors.white,
+                        ), //CircularAvatar
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -61,70 +86,68 @@ class headerHalf extends StatelessWidget {
         ),
         Padding(
           padding: const EdgeInsets.only(
-              right: 8.0,
-              left: 8.0,
-              top: 20.0,
-              bottom: 20.0,
+            right: 8.0,
+            left: 8.0,
+            top: 20.0,
+            bottom: 20.0,
           ),
           child: Row(
             children: <Widget>[
               Expanded(
                 flex: 4,
-                  //padding: const EdgeInsets.only(left: 2.0, right: 2.0),
-                  child: Stack(
-                    children:[
-                      Container(
-                        alignment: Alignment.center,
-                        child: Image.asset(
-                          'assets/images/img_round.png',
-                          height: 80,
-                          width: 80,
+                //padding: const EdgeInsets.only(left: 2.0, right: 2.0),
+                child: Stack(
+                  children: [
+                    Container(
+                      alignment: Alignment.center,
+                      child: Image.asset(
+                        'assets/images/img_round.png',
+                        height: 80,
+                        width: 80,
+                      ),
+                    ),
+                    Container(
+                      alignment: Alignment.center,
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 18.0),
+                        child: Column(
+                          children: [
+                            Image.asset(
+                              'assets/images/img_heart.png',
+                              height: 25,
+                              width: 25,
+                            ),
+                            const Text(
+                              'heart',
+                              style: TextStyle(
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      Container(
-                        alignment: Alignment.center,
-                        child: Padding(
-                          padding: const EdgeInsets.only(top: 18.0),
-                          child: Column(
-                            children: [
-                              Image.asset(
-                                'assets/images/img_heart.png',
-                                height: 25,
-                                width: 25,
-                              ),
-                              const Text(
-                                  'heart',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
+                ),
               ),
               Expanded(
                 flex: 6,
                 child: GestureDetector(
-                  onLongPress: () {
-                    log ("start record");
+                  onLongPress: () async {
+                    final isRecording = await recorder._toggleRecord();
 
+                    log("start record");
                   },
                   onLongPressEnd: (_) {
-                  log ("stop recordiing");
+                    log("stop recordiing");
                     // stop recording
                   },
-                  child:  Image.asset(
+                  child: Image.asset(
                     'assets/images/img_record.png',
                     height: 150,
                     width: 150,
                   ),
-
-
                 ),
-
               ),
               Expanded(
                 flex: 3,
@@ -132,9 +155,9 @@ class headerHalf extends StatelessWidget {
                   padding: const EdgeInsets.only(left: 17.0, right: 17.0),
                   child: SaveButton(
                     txt: 'Save',
-                    onPress: (){
+                    onPress: () {
                       null;
-                      },
+                    },
                   ),
                 ),
               ),
@@ -149,7 +172,8 @@ class headerHalf extends StatelessWidget {
           ),
         ),
         const Padding(
-          padding:  EdgeInsets.only(top: 20.0, bottom: 35.0, left: 35.0, right: 35.0),
+          padding:
+              EdgeInsets.only(top: 20.0, bottom: 35.0, left: 35.0, right: 35.0),
           child: Text(
             'Please ensure that you are wearing noise cancelling headphones',
             textAlign: TextAlign.center,
@@ -161,44 +185,66 @@ class headerHalf extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.start,
           children: const [
-             Padding(
-               padding: EdgeInsets.only(left: 18.0, top: 25.0),
-               child: Text(
+            Padding(
+              padding: EdgeInsets.only(left: 18.0, top: 25.0),
+              child: Text(
                 'Recordings',
                 textAlign: TextAlign.right,
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),
-               ),
-             ),
+              ),
+            ),
           ],
         ),
       ],
     );
   }
-
-
 }
-const pathToSave = 'audio_example.aac';
-class SoundRecorder{
+
+final pathToSaveAudio = 'audio_example.aac';
+
+class SoundRecorder {
+  bool _isRecorderInitialised = false;
+  bool get isRecording => _audioRecorder!.isRecording;
   FlutterSoundRecorder? _audioRecorder;
 
-  Future _startRecord() async{
-    await _audioRecorder!.startRecorder(toFile: pathToSave);
+  Future init() async{
+    _audioRecorder =FlutterSoundRecorder();
+
+
+    final status = await Permission.microphone.request();
+    if (status != PermissionStatus.granted){
+      throw RecordingPermissionException('Microphone permission denied');
+    }
+    await _audioRecorder!.openRecorder();
+    _isRecorderInitialised = true;
+  }
+  void dispose() async{
+
+    if (!_isRecorderInitialised) return;
+
+    _audioRecorder!.closeRecorder();
+    _audioRecorder = null;
+    _isRecorderInitialised = false;
   }
 
-  Future _stopRecord() async{
+  Future _record() async {
+    if (!_isRecorderInitialised) return;
+    await _audioRecorder!.startRecorder(toFile: pathToSaveAudio);
+  }
+
+  Future _stop() async {
+    if (!_isRecorderInitialised) return;
     await _audioRecorder!.stopRecorder();
   }
 
-  Future _toggleRecord() async{
-    if (_audioRecorder!.isStopped){
-      await _startRecord();
-    }
-    else {
-      await _stopRecord();
+  Future _toggleRecord() async {
+    if (_audioRecorder!.isStopped) {
+      await _record();
+    } else {
+      await _stop();
     }
   }
-
 }

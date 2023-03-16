@@ -2,6 +2,8 @@
     package="com.mboalab.community.opensource.outreachy.mboathoscope">
 
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
+
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
    <application
         android:label="mboathoscope"

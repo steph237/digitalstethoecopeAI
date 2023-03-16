@@ -14,7 +14,7 @@ class WaveformButton extends StatefulWidget {
 
 class _WaveformButtonState extends State<WaveformButton> {
 
-  final recorder =SoundRecorder();
+
   late final RecorderController recorderController;
 
   void _initialiseController() {
@@ -29,6 +29,13 @@ class _WaveformButtonState extends State<WaveformButton> {
   void initState() {
     super.initState();
     _initialiseController();
+
+    recorder.init();
+  }
+
+  @override
+  void dispose(){
+    recorder.dispose();
   }
 
   @override
@@ -85,12 +92,4 @@ class _WaveformButtonState extends State<WaveformButton> {
     );
   }
 }
-/*
 
-void _startRecording() async {
-  await recorderController.record(path);
-  // update state here to, for eample, change the button's state
-}
-void _stopRecording() async {
-  final path = await recorderController.stop();
-}*/
