@@ -242,11 +242,10 @@ class SoundRecorder {
   bool get isRecording => _audioRecorder!.isRecording;
   FlutterSoundRecorder? _audioRecorder;
   String _recordTxt = '00:00:00';
-  late String pathToSaveAudio;
-
+final   pathToSaveAudio = '/storage/MyRecordings/temp.wav';
   Future init() async{
     _audioRecorder =FlutterSoundRecorder();
-    const pathToSaveAudio = 'storage/MyRecordings/temp.wav';
+
     final status = await Permission.microphone.request();
     if (status != PermissionStatus.granted){
       throw RecordingPermissionException('Microphone permission denied');
