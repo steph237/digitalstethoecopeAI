@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:mboathoscope/buttons/SaveButton.dart';
 import 'package:flutter_sound/flutter_sound.dart';
+import 'package:path_provider/path_provider.dart';
 import 'WaveformButton.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -235,7 +236,8 @@ class _headerHalfState extends ConsumerState<headerHalf> {
 
 }
 
-const  pathToSaveAudio = '/storage/emulated/0/Download/';
+
+
 
 class SoundRecorder {
   bool _isRecorderInitialised = false;
@@ -244,7 +246,11 @@ class SoundRecorder {
   String _recordTxt = '00:00:00';
 
   Future init() async{
+    final mdirectory = await getApplicationDocumentsDirectory();
+   String pathToSaveAudio = mdirectory.path;
+
     _audioRecorder =FlutterSoundRecorder();
+
 
     final status = await Permission.microphone.request();
     if (status != PermissionStatus.granted){
@@ -273,10 +279,14 @@ class SoundRecorder {
   }
 
   Future _record() async {
+
+    final mdirectory = await getApplicationDocumentsDirectory();
+    String pathToSaveAudio = mdirectory.path;
+
     if (!_isRecorderInitialised) return;
     await _audioRecorder!.startRecorder(
         toFile: pathToSaveAudio,
-        codec: Codec.pcm16WAV);
+        );
 
 
     StreamSubscription _recorderSubscription =
