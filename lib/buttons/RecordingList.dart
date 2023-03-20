@@ -1,13 +1,42 @@
-import 'package:flutter/material.dart';
-import 'package:mboathoscope/buttons/WaveformButton.dart';
+import 'dart:io';
 
-class RecordingList extends StatelessWidget {
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mboathoscope/buttons/WaveformButton.dart';
+import 'package:mboathoscope/buttons/headerHalf.dart';
+
+
+
+class RecordingList extends ConsumerStatefulWidget {
   //final List<ListItem> items;
 
   const RecordingList({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  ConsumerState<RecordingList> createState() => _RecordingListState();
+}
+
+class _RecordingListState extends ConsumerState<RecordingList> {
+
+  Future<List<FileSystemEntity>>? audioRecorded;
+
+
+  @override
+  void initState() {
+    audioRecorded= SoundRecorder.getRecordings();
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context ) {
+
+
+    // final refresh = ref.watch(listProvider);
+    // if(refresh['refresh list']!){
+    // audioRecorded=SoundRecorder.getRecordings();
+    // }
+
+
     return SizedBox(
           height: 230,
           child: ListView.builder(

@@ -1,21 +1,30 @@
+import 'dart:async';
 import 'dart:developer';
+import 'dart:io';
 
 
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:mboathoscope/buttons/SaveButton.dart';
 import 'package:flutter_sound/flutter_sound.dart';
 import 'WaveformButton.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:intl/date_symbol_data_local.dart';
+import 'package:assets_audio_player/assets_audio_player.dart';
 
-class headerHalf extends StatefulWidget {
+
+
+class headerHalf extends ConsumerStatefulWidget {
   const headerHalf({Key? key}) : super(key: key);
 
   @override
-  State<headerHalf> createState() => _headerHalfState();
+  ConsumerState<headerHalf> createState() => _headerHalfState();
 }
 
-class _headerHalfState extends State<headerHalf> {
+class _headerHalfState extends ConsumerState<headerHalf> {
   final recorder = SoundRecorder();
+  String _recordTxt = '00:00:00';
 
   @override
   void initState(){
@@ -31,6 +40,10 @@ class _headerHalfState extends State<headerHalf> {
     recorder.dispose();
   }
 
+  void initializer() async{
+
+  }
+
   @override
   Widget build(BuildContext context) {
     final isRecording = recorder.isRecording;
@@ -40,6 +53,7 @@ class _headerHalfState extends State<headerHalf> {
           padding: const EdgeInsets.only(top: 34.0, left: 20, right: 20),
           child: Row(
             children: <Widget>[
+
               Expanded(
                 flex: 5,
                 child: Image.asset(
@@ -80,6 +94,12 @@ class _headerHalfState extends State<headerHalf> {
               ),
             ],
           ),
+        ),
+        Container(
+          child: Text(
+            _recordTxt,
+            style: const TextStyle(fontSize: 70),
+          )
         ),
         const SizedBox(
           height: 40,
@@ -135,17 +155,19 @@ class _headerHalfState extends State<headerHalf> {
                 child: GestureDetector(
                   onLongPress: () async {
                     final isRecording = await recorder._toggleRecord();
+
                     setState(() {
 
-                      backgroundColor: Color(0xffc70018);
-                      // foregroundColor: Colors.white,
                     });
-
 
                   },
                   onLongPressEnd: (_) async {
                     final isRecording = await recorder._toggleRecord();
                     log("stop recordiing");
+
+                    // ref.read(listProvider.notifier).state = {
+                    //   'refresh list': true
+                    // };
                     // stop recording
                   },
                   child: Image.asset(
@@ -177,6 +199,8 @@ class _headerHalfState extends State<headerHalf> {
             fontSize: 22,
           ),
         ),
+
+
         const Padding(
           padding:
               EdgeInsets.only(top: 20.0, bottom: 35.0, left: 35.0, right: 35.0),
@@ -205,27 +229,38 @@ class _headerHalfState extends State<headerHalf> {
           ],
         ),
       ],
+
     );
   }
+
 }
 
-final pathToSaveAudio = 'audio_example.aac';
+
 
 class SoundRecorder {
   bool _isRecorderInitialised = false;
   bool get isRecording => _audioRecorder!.isRecording;
   FlutterSoundRecorder? _audioRecorder;
+  String _recordTxt = '00:00:00';
+  late String pathToSaveAudio;
 
   Future init() async{
     _audioRecorder =FlutterSoundRecorder();
-
-
+    const pathToSaveAudio = 'storage/MyRecordings/temp.wav';
     final status = await Permission.microphone.request();
     if (status != PermissionStatus.granted){
       throw RecordingPermissionException('Microphone permission denied');
     }
     await _audioRecorder!.openRecorder();
     _isRecorderInitialised = true;
+    await _audioRecorder?.setSubscriptionDuration(const Duration(
+        milliseconds: 10));
+    await initializeDateFormatting();
+
+    Directory directory = Directory(pathToSaveAudio!);
+    if (!directory.existsSync()) {
+      directory.createSync(recursive: true);
+    }
   }
   void dispose() async{
 
@@ -238,7 +273,23 @@ class SoundRecorder {
 
   Future _record() async {
     if (!_isRecorderInitialised) return;
-    await _audioRecorder!.startRecorder(toFile: pathToSaveAudio);
+    await _audioRecorder!.startRecorder(
+        toFile: pathToSaveAudio,
+        codec: Codec.pcm16WAV);
+
+
+    StreamSubscription _recorderSubscription =
+    _audioRecorder!.onProgress!.listen((e) {
+      var date = DateTime.fromMillisecondsSinceEpoch(
+          e.duration.inMilliseconds,
+          isUtc: true);
+      var timeText = DateFormat('mm:ss:SS', 'en_GB').format(date);
+
+
+    });
+
+    _recorderSubscription.cancel();
+
   }
 
   Future _stop() async {
@@ -253,5 +304,16 @@ class SoundRecorder {
       await _stop();
     }
     log("start record");
+  }
+
+  static Future<List<FileSystemEntity>> getRecordings() async {
+    try {
+      Directory recordings = Directory('/MyRecordings');
+      List<FileSystemEntity> files = await recordings.list().toList();
+      return files;
+    } catch (error) {
+      print(error);
+      return [];
+    }
   }
 }
