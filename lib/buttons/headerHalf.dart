@@ -235,14 +235,14 @@ class _headerHalfState extends ConsumerState<headerHalf> {
 
 }
 
-
+const  pathToSaveAudio = '/storage/emulated/0/Download/';
 
 class SoundRecorder {
   bool _isRecorderInitialised = false;
   bool get isRecording => _audioRecorder!.isRecording;
   FlutterSoundRecorder? _audioRecorder;
   String _recordTxt = '00:00:00';
-final   pathToSaveAudio = '/storage/MyRecordings/temp.wav';
+
   Future init() async{
     _audioRecorder =FlutterSoundRecorder();
 
@@ -250,7 +250,9 @@ final   pathToSaveAudio = '/storage/MyRecordings/temp.wav';
     if (status != PermissionStatus.granted){
       throw RecordingPermissionException('Microphone permission denied');
     }
-    await _audioRecorder!.openRecorder();
+    await _audioRecorder!.openRecorder(
+
+    );
     _isRecorderInitialised = true;
     await _audioRecorder?.setSubscriptionDuration(const Duration(
         milliseconds: 10));
