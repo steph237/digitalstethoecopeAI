@@ -1,4 +1,6 @@
 import 'dart:developer';
+import 'dart:io';
+import 'dart:typed_data';
 
 
 import 'package:flutter/material.dart';
@@ -6,6 +8,10 @@ import 'package:mboathoscope/buttons/SaveButton.dart';
 import 'package:flutter_sound/flutter_sound.dart';
 import 'WaveformButton.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:path_provider/path_provider.dart';
+
+import 'package:path/path.dart' as Path;
+import 'package:uuid/uuid.dart';
 
 class headerHalf extends StatefulWidget {
   const headerHalf({Key? key}) : super(key: key);
@@ -209,7 +215,48 @@ class _headerHalfState extends State<headerHalf> {
   }
 }
 
-final pathToSaveAudio = 'audio_example.aac';
+// final pathToSaveAudio = 'audio_example.aac';
+
+
+// String _fileName = 'Recording_';
+// String _fileExtension = '.aac';
+// String pathToSaveAudio = '/storage/emulated/0/SoundRecorder';
+
+// void _createFile() async {
+//   var _completeFileName = await generateFileName('audio.aac', 1);
+//   File(pathToSaveAudio + '/' + _completeFileName)
+//       .create(recursive: true)
+//       .then((File file) async {
+//     //write to file
+//     Uint8List bytes = await file.readAsBytes();
+//     file.writeAsBytes(bytes);
+//     print(file.path);
+//   });
+// }
+
+
+// String generateFileName(String originalFileName, int index) {
+//   var uuid = Uuid();
+//   var extension = Path.extension(originalFileName);
+//   var randomName = uuid.v4();
+//   return '$randomName$extension';
+// }
+
+// void _createDirectory() async {
+//   bool isDirectoryCreated = await Directory(pathToSaveAudio).exists();
+//   if (!isDirectoryCreated) {
+//     Directory(pathToSaveAudio).create()
+//     // The created directory is returned as a Future.
+//         .then((Directory directory) {
+//       print(directory.path);
+//     });
+//   }
+// }
+
+// void _writeFileToStorage() async {
+//   _createDirectory();
+//   _createFile();
+// }
 
 class SoundRecorder {
   bool _isRecorderInitialised = false;
@@ -237,8 +284,31 @@ class SoundRecorder {
   }
 
   Future _record() async {
+
+
+    String pathToSaveAudio = 'audio.aac';
+    var tempPath = await getTemporaryDirectory();
+    pathToSaveAudio = tempPath.path + "/" + pathToSaveAudio;
+
+
+   //  Directory tempDir = await getTemporaryDirectory();
+   //  File filePath = File('${tempDir.path}/audio');
+   // String pathToSaveAudio = filePath.path;
+
+   //  var tempDir = await getTemporaryDirectory();
+   // String pathToSaveAudio= '${tempDir.path}/audio.mp4';
+   //
+   //  final directory = await getApplicationDocumentsDirectory();
+   // String pathToSaveAudio= directory.path;
+
+
+
+
     if (!_isRecorderInitialised) return;
     await _audioRecorder!.startRecorder(toFile: pathToSaveAudio);
+
+    // _writeFileToStorage();
+    log(pathToSaveAudio);
   }
 
   Future _stop() async {
