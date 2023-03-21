@@ -246,8 +246,14 @@ class SoundRecorder {
   String _recordTxt = '00:00:00';
 
   Future init() async{
-    final mdirectory = await getApplicationDocumentsDirectory();
-   String pathToSaveAudio = mdirectory.path;
+   //  final mdirectory = await getApplicationDocumentsDirectory();
+   // String pathToSaveAudio = mdirectory.path;
+
+
+    String pathToSaveAudio = 'tau_file.mp4';
+    var tempPath = await getTemporaryDirectory();
+    pathToSaveAudio = tempPath.path + "/" + pathToSaveAudio;
+
 
     _audioRecorder =FlutterSoundRecorder();
 
