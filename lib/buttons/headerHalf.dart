@@ -2,7 +2,6 @@ import 'dart:developer';
 import 'dart:io';
 import 'dart:typed_data';
 
-
 import 'package:flutter/material.dart';
 import 'package:mboathoscope/buttons/SaveButton.dart';
 import 'package:flutter_sound/flutter_sound.dart';
@@ -12,6 +11,7 @@ import 'package:path_provider/path_provider.dart';
 
 import 'package:path/path.dart' as Path;
 import 'package:uuid/uuid.dart';
+import 'package:flutter_sound_platform_interface/flutter_sound_recorder_platform_interface.dart';
 
 class headerHalf extends StatefulWidget {
   const headerHalf({Key? key}) : super(key: key);
@@ -22,16 +22,18 @@ class headerHalf extends StatefulWidget {
 
 class _headerHalfState extends State<headerHalf> {
   final recorder = SoundRecorder();
+  Codec _codec = Codec.aacMP4;
+  String _mPath = 'tau_file.mp4';
 
   @override
-  void initState(){
+  void initState() {
     super.initState();
 
     recorder.init();
   }
 
   @override
-  void dispose(){
+  void dispose() {
     super.dispose();
 
     recorder.dispose();
@@ -142,12 +144,10 @@ class _headerHalfState extends State<headerHalf> {
                   onLongPress: () async {
                     final isRecording = await recorder._toggleRecord();
                     setState(() {
-
-                      backgroundColor: Color(0xffc70018);
+                      backgroundColor:
+                      Color(0xffc70018);
                       // foregroundColor: Colors.white,
                     });
-
-
                   },
                   onLongPressEnd: (_) async {
                     final isRecording = await recorder._toggleRecord();
@@ -217,7 +217,6 @@ class _headerHalfState extends State<headerHalf> {
 
 // final pathToSaveAudio = 'audio_example.aac';
 
-
 // String _fileName = 'Recording_';
 // String _fileExtension = '.aac';
 // String pathToSaveAudio = '/storage/emulated/0/SoundRecorder';
@@ -233,7 +232,6 @@ class _headerHalfState extends State<headerHalf> {
 //     print(file.path);
 //   });
 // }
-
 
 // String generateFileName(String originalFileName, int index) {
 //   var uuid = Uuid();
@@ -263,19 +261,18 @@ class SoundRecorder {
   bool get isRecording => _audioRecorder!.isRecording;
   FlutterSoundRecorder? _audioRecorder;
 
-  Future init() async{
-    _audioRecorder =FlutterSoundRecorder();
-
+  Future init() async {
+    _audioRecorder = FlutterSoundRecorder();
 
     final status = await Permission.microphone.request();
-    if (status != PermissionStatus.granted){
+    if (status != PermissionStatus.granted) {
       throw RecordingPermissionException('Microphone permission denied');
     }
     await _audioRecorder!.openRecorder();
     _isRecorderInitialised = true;
   }
-  void dispose() async{
 
+  void dispose() async {
     if (!_isRecorderInitialised) return;
 
     _audioRecorder!.closeRecorder();
@@ -284,28 +281,28 @@ class SoundRecorder {
   }
 
   Future _record() async {
+    // set codec
+    Codec _codec = Codec.aacMP4;
+    String pathToSaveAudio = 'audio.mp4';
+    const theSource = AudioSource.microphone;
 
+    // uncomment these two lines below if you want a different path but the one above works
+    var tempPath = await getExternalStorageDirectories();
+    pathToSaveAudio = "${tempPath?.first.path}/$pathToSaveAudio";
 
-    String pathToSaveAudio = 'audio.aac';
-    var tempPath = await getTemporaryDirectory();
-    pathToSaveAudio = tempPath.path + "/" + pathToSaveAudio;
+    //  Directory tempDir = await getTemporaryDirectory();
+    //  File filePath = File('${tempDir.path}/audio');
+    // String pathToSaveAudio = filePath.path;
 
-
-   //  Directory tempDir = await getTemporaryDirectory();
-   //  File filePath = File('${tempDir.path}/audio');
-   // String pathToSaveAudio = filePath.path;
-
-   //  var tempDir = await getTemporaryDirectory();
-   // String pathToSaveAudio= '${tempDir.path}/audio.mp4';
-   //
-   //  final directory = await getApplicationDocumentsDirectory();
-   // String pathToSaveAudio= directory.path;
-
-
-
+    //  var tempDir = await getTemporaryDirectory();
+    // String pathToSaveAudio= '${tempDir.path}/audio.mp4';
+    //
+    //  final directory = await getApplicationDocumentsDirectory();
+    // String pathToSaveAudio= directory.path;
 
     if (!_isRecorderInitialised) return;
-    await _audioRecorder!.startRecorder(toFile: pathToSaveAudio);
+    await _audioRecorder!.startRecorder(
+        toFile: pathToSaveAudio, codec: _codec, audioSource: theSource);
 
     // _writeFileToStorage();
     log(pathToSaveAudio);
@@ -322,6 +319,6 @@ class SoundRecorder {
     } else {
       await _stop();
     }
-    log("start record");
+    log("toggle record");
   }
 }
