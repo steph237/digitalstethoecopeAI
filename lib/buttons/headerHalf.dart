@@ -7,6 +7,7 @@ import 'package:mboathoscope/buttons/SaveButton.dart';
 import 'package:flutter_sound/flutter_sound.dart';
 import 'WaveformButton.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'package:path/path.dart' as Path;
@@ -22,8 +23,6 @@ class headerHalf extends StatefulWidget {
 
 class _headerHalfState extends State<headerHalf> {
   final recorder = SoundRecorder();
-  Codec _codec = Codec.aacMP4;
-  String _mPath = 'tau_file.mp4';
 
   @override
   void initState() {
@@ -215,51 +214,12 @@ class _headerHalfState extends State<headerHalf> {
   }
 }
 
-// final pathToSaveAudio = 'audio_example.aac';
-
-// String _fileName = 'Recording_';
-// String _fileExtension = '.aac';
-// String pathToSaveAudio = '/storage/emulated/0/SoundRecorder';
-
-// void _createFile() async {
-//   var _completeFileName = await generateFileName('audio.aac', 1);
-//   File(pathToSaveAudio + '/' + _completeFileName)
-//       .create(recursive: true)
-//       .then((File file) async {
-//     //write to file
-//     Uint8List bytes = await file.readAsBytes();
-//     file.writeAsBytes(bytes);
-//     print(file.path);
-//   });
-// }
-
-// String generateFileName(String originalFileName, int index) {
-//   var uuid = Uuid();
-//   var extension = Path.extension(originalFileName);
-//   var randomName = uuid.v4();
-//   return '$randomName$extension';
-// }
-
-// void _createDirectory() async {
-//   bool isDirectoryCreated = await Directory(pathToSaveAudio).exists();
-//   if (!isDirectoryCreated) {
-//     Directory(pathToSaveAudio).create()
-//     // The created directory is returned as a Future.
-//         .then((Directory directory) {
-//       print(directory.path);
-//     });
-//   }
-// }
-
-// void _writeFileToStorage() async {
-//   _createDirectory();
-//   _createFile();
-// }
-
 class SoundRecorder {
   bool _isRecorderInitialised = false;
   bool get isRecording => _audioRecorder!.isRecording;
   FlutterSoundRecorder? _audioRecorder;
+
+  static final _audioPlayer = AssetsAudioPlayer();
 
   Future init() async {
     _audioRecorder = FlutterSoundRecorder();
@@ -286,25 +246,14 @@ class SoundRecorder {
     String pathToSaveAudio = 'audio.mp4';
     const theSource = AudioSource.microphone;
 
-    // uncomment these two lines below if you want a different path but the one above works
     var tempPath = await getExternalStorageDirectories();
     pathToSaveAudio = "${tempPath?.first.path}/$pathToSaveAudio";
-
-    //  Directory tempDir = await getTemporaryDirectory();
-    //  File filePath = File('${tempDir.path}/audio');
-    // String pathToSaveAudio = filePath.path;
-
-    //  var tempDir = await getTemporaryDirectory();
-    // String pathToSaveAudio= '${tempDir.path}/audio.mp4';
-    //
-    //  final directory = await getApplicationDocumentsDirectory();
-    // String pathToSaveAudio= directory.path;
 
     if (!_isRecorderInitialised) return;
     await _audioRecorder!.startRecorder(
         toFile: pathToSaveAudio, codec: _codec, audioSource: theSource);
 
-    // _writeFileToStorage();
+
     log(pathToSaveAudio);
   }
 
@@ -321,4 +270,34 @@ class SoundRecorder {
     }
     log("toggle record");
   }
+  static Future<void> openRecording(String recordPath) async {
+    _audioPlayer.open(
+      Audio.file(recordPath),
+      showNotification: true,
+    );
+  }
+
+  static void play(){
+    _audioPlayer.play();
+  }
+
+  static void pause(){
+    _audioPlayer.pause();
+  }
+
+  static Future<void> stopPlaying() async {
+    _audioPlayer.stop();
+  }
+
+  static Future<List<FileSystemEntity>> getAudio() async {
+    try {
+      Directory recordings = Directory('/storage/emulated/0/Android/data/com.mboalab.community.opensource.outreachy.mboathoscope/files/');
+      List<FileSystemEntity> files = await recordings.list().toList();
+      return files;
+    } catch (error) {
+      print(error);
+      return [];
+    }
+  }
 }
+
